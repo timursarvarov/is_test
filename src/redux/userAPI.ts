@@ -3,12 +3,12 @@ import NProgress from "nprogress";
 import { IUser } from '../shared/interfaces/user.interface';
 
 //Should be in .env file
-const BASEURL = "http://localhost:3000/api/users";
+
 
 const dynamicBaseQuery: BaseQueryFn<string | FetchArgs,
 	unknown,
 	FetchBaseQueryError> = async (args, WebApi, extraOptions) => {
-		const baseUrl = (WebApi.getState() as any)?.configuration?.baseUrl ?? BASEURL;
+		const baseUrl = (WebApi.getState() as any)?.configuration?.baseUrl ?? import.meta.env.VITE_FETCH_SAVED_USERS_URL;
 
 		console.log(baseUrl)
 		const rawBaseQuery = fetchBaseQuery({ baseUrl });
@@ -17,11 +17,12 @@ const dynamicBaseQuery: BaseQueryFn<string | FetchArgs,
 
 
 
-export const userAPI = createApi({
+export const userApiSlice = createApi({
 	reducerPath: "UserAPI",
 	baseQuery: dynamicBaseQuery,
-	tagTypes: ["Users"],
+	tagTypes: ["newUsers", "savedUsers"],
 	endpoints: (builder) => ({
+
 		getAllSavedUsers: builder.query<IUser[], { page: number; limit: number }>({
 			query({ page, limit }) {
 				return {
@@ -32,13 +33,13 @@ export const userAPI = createApi({
 				result
 					? [
 						...result.map(({ email }) => ({
-							type: "Users" as const,
+							type: "savedUsers" as const,
 							email,
 						})),
-						{ type: "Users", id: "LIST" },
+						{ type: "savedUsers", id: "LIST" },
 					]
-					: [{ type: "Users", id: "LIST" }],
-			transformResponse: (results: { users: IUser[] }) => results.users,
+					: [{ type: "savedUsers", id: "LIST" }],
+			transformResponse: (res: { results: IUser[] }) => res.results,
 
 			keepUnusedDataFor: 5,
 
@@ -46,6 +47,8 @@ export const userAPI = createApi({
 				NProgress.start();
 			},
 		}),
+
+
 
 		getAllNewUsers: builder.query<IUser[], { page: number; limit: number }>({
 			query({ page, limit }) {
@@ -57,14 +60,48 @@ export const userAPI = createApi({
 				result
 					? [
 						...result.map(({ email }) => ({
-							type: "Users" as const,
+							type: "newUsers" as const,
 							email,
 						})),
-						{ type: "Users", id: "LIST" },
+						{ type: "newUsers", id: "LIST" },
 					]
-					: [{ type: "Users", id: "LIST" }],
+					: [{ type: "newUsers", id: "LIST" }],
 			transformResponse: (res: { results: IUser[] }) => {
 				return res.results
+			},
+
+			keepUnusedDataFor: 5,
+
+			onQueryStarted(arg, api) {
+				NProgress.start();
+			},
+		}),
+
+		getOneNewUser: builder.query<IUser, { email: string }>({
+			query({ email }) {
+				return {
+					url: `/?email=${email}`,
+				};
+			},
+			transformResponse: (res: { results: IUser[] }) => {
+				return res.results[0]
+			},
+
+			keepUnusedDataFor: 5,
+
+			onQueryStarted(arg, api) {
+				NProgress.start();
+			},
+		}),
+
+		getOneSavedUser: builder.query<IUser, { email: string }>({
+			query({ email }) {
+				return {
+					url: `/?email=${email}`,
+				};
+			},
+			transformResponse: (res: { results: IUser[] }) => {
+				return res.results[0]
 			},
 
 			keepUnusedDataFor: 5,
@@ -79,9 +116,8 @@ export const userAPI = createApi({
 });
 
 export const {
-	// useCreateUserMutation,
-	// useDeleteUserMutation,
-	// useUpdateUserMutation,
 	useGetAllSavedUsersQuery,
-	useGetAllNewUsersQuery
-} = userAPI;
+	useGetAllNewUsersQuery,
+	useGetOneSavedUserQuery,
+	useGetOneNewUserQuery
+} = userApiSlice;

@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import FetchUsersScreen from "../components/pages/FetchUsersScreen/FetchUsersScreen";
 import HomeScreen from "../components/pages/HomeScreen/HomeScreen";
 import SavedUsersScreen from "../components/pages/SavedUsersScreen/SavedUsersScreen";
+import UserProfileScreen from "../components/pages/UserProfileScreen/UserProfileScreen";
 
 export const router = createBrowserRouter([
 	{
@@ -20,6 +21,12 @@ export const router = createBrowserRouter([
 		path: "/saved-users",
 		Component() {
 			return <SavedUsersScreen />;
+		},
+	},
+	{
+		path: "/user/:email",
+		Component() {
+			return <UserProfileScreen />;
 		},
 	},
 ]);

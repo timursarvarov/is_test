@@ -1,7 +1,7 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { userAPI } from "./userAPI";
+import { userApiSlice } from "./userAPI";
 
 
 const configurationSlice = createSlice({
@@ -19,11 +19,11 @@ const configurationSlice = createSlice({
 export const store = configureStore({
 	reducer: {
 		configuration: configurationSlice.reducer,
-		[userAPI.reducerPath]: userAPI.reducer,
+		[userApiSlice.reducerPath]: userApiSlice.reducer,
 	},
 	devTools: process.env.NODE_ENV === "development",
 	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware({}).concat([userAPI.middleware]),
+		getDefaultMiddleware({}).concat([userApiSlice.middleware]),
 });
 
 setupListeners(store.dispatch);

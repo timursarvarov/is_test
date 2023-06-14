@@ -4,20 +4,17 @@ import { useDispatch } from "react-redux";
 import { setBaseUrl } from "../../../redux/store";
 import { useGetAllNewUsersQuery } from "../../../redux/userAPI";
 import { IUser } from "../../../shared/interfaces/user.interface";
-import UserRow from "../../shared/UserRow";
-
-//Should be in a .env file
-const BASEURL_RANDOM_USER = "https://randomuser.me/api";
+import UserRow from "../../shared/UserRow/UserRow";
 
 const FetchUsersScreen: React.FC = () => {
 	const dispatch = useDispatch();
 	useEffect(() => {
 		const setUrl = async () => {
-			dispatch(setBaseUrl(BASEURL_RANDOM_USER)); // Dispatch the action to set the baseUrl
+			dispatch(setBaseUrl(import.meta.env.VITE_FETCH_USERS_URL)); // Dispatch the action to set the baseUrl
 		};
 		setUrl();
 		return () => {
-			dispatch(setBaseUrl("")); // Dispatch the action to set the baseUrl
+			dispatch(setBaseUrl(import.meta.env.VITE_FETCH_SAVED_USERS_URL));
 		};
 	}, []);
 

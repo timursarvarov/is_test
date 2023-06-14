@@ -18,4 +18,5 @@ export interface IUser {
 	login: {
 		uuid: string;
 	};
+	saved?: boolean;
 }

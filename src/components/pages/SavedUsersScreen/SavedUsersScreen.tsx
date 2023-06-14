@@ -2,9 +2,8 @@ import NProgress from "nprogress";
 import React, { useEffect } from "react";
 import { useGetAllSavedUsersQuery } from "../../../redux/userAPI";
 import { IUser } from "../../../shared/interfaces/user.interface";
-import UserRow from "../../shared/UserRow";
+import UserRow from '../../shared/UserRow/UserRow';
 
-//Should be in a .env file
 
 const FetchUsersScreen: React.FC = () => {
 	const { isLoading, isFetching, isError, isSuccess, error, data } =
