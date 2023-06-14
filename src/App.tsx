@@ -1,16 +1,11 @@
-import { useState } from "react";
+import { RouterProvider } from "react-router-dom";
 
 import "./App.css";
+import { router } from "./router/router";
 
 function App() {
-	const [count, setCount] = useState(0);
-
 	return (
-		<>
-			<div className="App">
-				<App />
-			</div>
-		</>
+		<RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
 	);
 }
 
