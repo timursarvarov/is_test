@@ -1,11 +1,15 @@
 import { RouterProvider } from "react-router-dom";
 
+import { Provider } from "react-redux";
 import "./App.css";
+import { store } from "./redux/store";
 import { router } from "./router/router";
 
 function App() {
 	return (
-		<RouterProvider router={router} fallbackElement={<p>Loading...</p>} />
+		<Provider store={store}>
+			<RouterProvider router={router} />
+		</Provider>
 	);
 }
 

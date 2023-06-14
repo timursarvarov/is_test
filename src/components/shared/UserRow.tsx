@@ -1,8 +1,8 @@
-import { User } from "../../shared/interfaces/User.interface";
+import { IUser } from "../../shared/interfaces/User.interface";
 import "./UserRow.css";
 
 interface UserRowProps {
-	user: User;
+	user: IUser;
 }
 
 const UserRow: React.FC<UserRowProps> = ({ user }) => {

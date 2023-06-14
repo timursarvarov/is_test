@@ -1,5 +1,6 @@
 
-export interface User {
+export interface IUser {
+	_id?: string;
 	name: {
 		title: string;
 		first: string;
