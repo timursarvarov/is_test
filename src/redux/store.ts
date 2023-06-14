@@ -7,7 +7,7 @@ import { userAPI } from "./userAPI";
 const configurationSlice = createSlice({
 	name: "configuration",
 	initialState: {
-		baseUrl: "", // Set the initial baseUrl value here
+		baseUrl: null, // Set the initial baseUrl value here
 	},
 	reducers: {
 		setBaseUrl: (state, action) => {

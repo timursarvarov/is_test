@@ -1,4 +1,4 @@
-import { IUser } from "../../shared/interfaces/User.interface";
+import { IUser } from "../../shared/interfaces/user.interface";
 import "./UserRow.css";
 
 interface UserRowProps {
@@ -12,12 +12,12 @@ const UserRow: React.FC<UserRowProps> = ({ user }) => {
 		<div className="user-row">
 			<img
 				className="user-thumbnail"
-				src={picture.thumbnail}
+				src={picture?.thumbnail}
 				alt="thumbnail"
 			/>
-			<span className="user-name">{`${name.title} ${name.first} ${name.last}`}</span>
+			<span className="user-name">{`${name?.title} ${name?.first} ${name?.last}`}</span>
 			<span>{gender}</span>
-			<span> {location.country}</span>
+			<span> {location?.country}</span>
 			<span> {phone}</span>
 			<span> {email}</span>
 		</div>

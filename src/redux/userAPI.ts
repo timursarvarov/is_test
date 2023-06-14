@@ -8,8 +8,9 @@ const BASEURL = "http://localhost:3000/api/users";
 const dynamicBaseQuery: BaseQueryFn<string | FetchArgs,
 	unknown,
 	FetchBaseQueryError> = async (args, WebApi, extraOptions) => {
-		console.log(WebApi.getState())
 		const baseUrl = (WebApi.getState() as any)?.configuration?.baseUrl ?? BASEURL;
+
+		console.log(baseUrl)
 		const rawBaseQuery = fetchBaseQuery({ baseUrl });
 		return rawBaseQuery(args, WebApi, extraOptions);
 	};
@@ -21,6 +22,30 @@ export const userAPI = createApi({
 	baseQuery: dynamicBaseQuery,
 	tagTypes: ["Users"],
 	endpoints: (builder) => ({
+		getAllSavedUsers: builder.query<IUser[], { page: number; limit: number }>({
+			query({ page, limit }) {
+				return {
+					url: `/?page=${page}&limit=${limit}`,
+				};
+			},
+			providesTags: (result) =>
+				result
+					? [
+						...result.map(({ email }) => ({
+							type: "Users" as const,
+							email,
+						})),
+						{ type: "Users", id: "LIST" },
+					]
+					: [{ type: "Users", id: "LIST" }],
+			transformResponse: (results: { users: IUser[] }) => results.users,
+
+			keepUnusedDataFor: 5,
+
+			onQueryStarted(arg, api) {
+				NProgress.start();
+			},
+		}),
 
 		getAllNewUsers: builder.query<IUser[], { page: number; limit: number }>({
 			query({ page, limit }) {
@@ -39,7 +64,6 @@ export const userAPI = createApi({
 					]
 					: [{ type: "Users", id: "LIST" }],
 			transformResponse: (res: { results: IUser[] }) => {
-				console.log(res)
 				return res.results
 			},
 
@@ -55,5 +79,9 @@ export const userAPI = createApi({
 });
 
 export const {
+	// useCreateUserMutation,
+	// useDeleteUserMutation,
+	// useUpdateUserMutation,
+	useGetAllSavedUsersQuery,
 	useGetAllNewUsersQuery
 } = userAPI;
