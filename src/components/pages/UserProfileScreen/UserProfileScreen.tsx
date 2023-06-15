@@ -1,8 +1,10 @@
 import NProgress from "nprogress";
 import { FC, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { setBaseUrl } from "../../../redux/store";
 import {
+	useDeleteUserMutation,
 	useGetAllNewUsersQuery,
 	useGetOneNewUserQuery,
 	useGetOneSavedUserQuery,
@@ -16,6 +18,7 @@ const UserProfileScreen: FC = () => {
 	const [canFetchNew, setCanFetchNew] = useState(false);
 	const [canFetchSaved, setCanFetchSaved] = useState(false);
 	const [updateUser] = useUpdateUserMutation();
+	const navigate = useNavigate();
 
 	const handleNameChange = (event: { target: { value: any } }) => {
 		setEditableName(event.target.value);
@@ -23,7 +26,6 @@ const UserProfileScreen: FC = () => {
 	useGetAllNewUsersQuery;
 
 	const email = location.search.split("=")[1];
-	console.log(email);
 
 	const {
 		isSuccess: isSuccessOfNew,
@@ -63,6 +65,8 @@ const UserProfileScreen: FC = () => {
 		};
 		dispatchUrl();
 	};
+
+	const [deleteUser, { isSuccess: deleteSuccess }] = useDeleteUserMutation();
 
 	useEffect(() => {
 		if (success) {
@@ -104,6 +108,13 @@ const UserProfileScreen: FC = () => {
 	}, [isSuccessOfNew]);
 
 	useEffect(() => {
+		if (deleteSuccess) {
+			navigate(-1);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [deleteSuccess]);
+
+	useEffect(() => {
 		if (savedUser) {
 			setUser(savedUser);
 			setEditableName(savedUser.name?.first);
@@ -111,12 +122,9 @@ const UserProfileScreen: FC = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isSuccessOfSaved]);
 
-	const handleSave = () => {
-		// onSave(editableName);
-	};
-
 	const handleDelete = () => {
-		// onDelete();
+		if (!user?._id) return;
+		deleteUser(user._id);
 	};
 
 	const handleUpdate = () => {
@@ -131,7 +139,7 @@ const UserProfileScreen: FC = () => {
 	};
 
 	const handleBack = () => {
-		// onBack();
+		navigate(-1);
 	};
 
 	return (
