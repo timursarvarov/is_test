@@ -1,6 +1,7 @@
 import { BaseQueryFn, FetchArgs, FetchBaseQueryError, createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import NProgress from "nprogress";
 import { IUser } from '../shared/interfaces/user.interface';
+import { IMutateUser, IUserResponse } from './types';
 
 //Should be in .env file
 
@@ -22,7 +23,20 @@ export const userApiSlice = createApi({
 	baseQuery: dynamicBaseQuery,
 	tagTypes: ["newUsers", "savedUsers"],
 	endpoints: (builder) => ({
-
+		updateUser: builder.mutation<IUserResponse, { email: string; user: IMutateUser }>({
+			query({ email, user }) {
+				return {
+					url: `/?email=${email}`,
+					method: "PATCH",
+					body: user,
+				};
+			},
+			transformResponse: (response: { User: IUserResponse }) => response.User,
+			onQueryStarted(arg, api) {
+				NProgress.start();
+			},
+			invalidatesTags: ['savedUsers']
+		}),
 		getAllSavedUsers: builder.query<IUser[], { page: number; limit: number }>({
 			query({ page, limit }) {
 				return {
@@ -47,8 +61,6 @@ export const userApiSlice = createApi({
 				NProgress.start();
 			},
 		}),
-
-
 
 		getAllNewUsers: builder.query<IUser[], { page: number; limit: number }>({
 			query({ page, limit }) {
@@ -83,6 +95,7 @@ export const userApiSlice = createApi({
 					url: `/?email=${email}`,
 				};
 			},
+			providesTags: ['newUsers'],
 			transformResponse: (res: { results: IUser[] }) => {
 				return res.results[0]
 			},
@@ -97,13 +110,13 @@ export const userApiSlice = createApi({
 		getOneSavedUser: builder.query<IUser, { email: string }>({
 			query({ email }) {
 				return {
-					url: `/?email=${email}`,
+					url: `user/${email}`,
 				};
 			},
 			transformResponse: (res: { results: IUser[] }) => {
 				return res.results[0]
 			},
-
+			providesTags: ['savedUsers'],
 			keepUnusedDataFor: 5,
 
 			onQueryStarted(arg, api) {
@@ -116,6 +129,9 @@ export const userApiSlice = createApi({
 });
 
 export const {
+	// useCreateUserMutation,
+	// useDeleteUserMutation,
+	useUpdateUserMutation,
 	useGetAllSavedUsersQuery,
 	useGetAllNewUsersQuery,
 	useGetOneSavedUserQuery,

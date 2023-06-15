@@ -24,6 +24,12 @@ export const router = createBrowserRouter([
 		},
 	},
 	{
+		path: "/user",
+		Component() {
+			return <UserProfileScreen />;
+		},
+	},
+	{
 		path: "/user/:email",
 		Component() {
 			return <UserProfileScreen />;

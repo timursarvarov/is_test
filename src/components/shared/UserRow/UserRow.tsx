@@ -11,7 +11,7 @@ const UserRow: React.FC<UserRowProps> = ({ user }) => {
 	const { picture, name, gender, location, phone, email } = user;
 
 	return (
-		<Link to={`/user/${user.email}`}>
+		<Link to={`/user/?email=${user.email}`}>
 			<div className="user-row">
 				<img
 					className="user-thumbnail"

@@ -5,7 +5,6 @@ import "./App.css";
 import { store } from "./redux/store";
 import { router } from "./router/router";
 
-
 function App() {
 	return (
 		<Provider store={store}>

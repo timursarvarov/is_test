@@ -1,35 +1,29 @@
 import NProgress from "nprogress";
 import { FC, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
 import { setBaseUrl } from "../../../redux/store";
 import {
 	useGetAllNewUsersQuery,
 	useGetOneNewUserQuery,
 	useGetOneSavedUserQuery,
+	useUpdateUserMutation,
 } from "../../../redux/userAPI";
 import { IUser } from "../../../shared/interfaces/user.interface";
 
 const UserProfileScreen: FC = () => {
 	const [user, setUser] = useState<IUser | null>(null);
 	const [editableName, setEditableName] = useState("");
+	const [canFetchNew, setCanFetchNew] = useState(false);
+	const [canFetchSaved, setCanFetchSaved] = useState(false);
+	const [updateUser] = useUpdateUserMutation();
 
 	const handleNameChange = (event: { target: { value: any } }) => {
 		setEditableName(event.target.value);
 	};
 	useGetAllNewUsersQuery;
 
-	const { email } = useParams();
-
-	const {
-		isSuccess: isSuccessOfSaved,
-		isFetching: isFetchingOfSaved,
-		isLoading: loadingOfSaved,
-		error: errorOfSaved,
-		data: savedUser,
-	} = useGetOneSavedUserQuery({
-		email: email!,
-	});
+	const email = location.search.split("=")[1];
+	console.log(email);
 
 	const {
 		isSuccess: isSuccessOfNew,
@@ -41,28 +35,34 @@ const UserProfileScreen: FC = () => {
 		{
 			email: email!,
 		},
-		{ skip: isSuccessOfSaved || loadingOfSaved }
+		{ skip: !canFetchNew }
+	);
+
+	const {
+		isSuccess: isSuccessOfSaved,
+		isFetching: isFetchingOfSaved,
+		isLoading: loadingOfSaved,
+		error: errorOfSaved,
+		data: savedUser,
+	} = useGetOneSavedUserQuery(
+		{
+			email: email!,
+		},
+		{ skip: !canFetchSaved }
 	);
 
 	const loading =
 		loadingOfNew || loadingOfSaved || isFetchingOfSaved || isFetchingOfNew;
 	const success = isSuccessOfSaved || isSuccessOfNew;
-	const error = errorOfNew || errorOfSaved || !errorOfSaved;
+	const error = errorOfNew || errorOfSaved;
 	const dispatch = useDispatch();
 
 	const setUrl = (url: string) => {
-		const setUrl = async () => {
+		const dispatchUrl = async () => {
 			dispatch(setBaseUrl(url));
 		};
-		setUrl();
+		dispatchUrl();
 	};
-	useEffect(() => {
-		setUrl(import.meta.env.VITE_FETCH_USERS_URL);
-		return () => {
-			setUrl(import.meta.env.VITE_FETCH_SAVED_USERS_URL);
-		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isSuccessOfSaved]);
 
 	useEffect(() => {
 		if (success) {
@@ -70,14 +70,30 @@ const UserProfileScreen: FC = () => {
 		}
 
 		if (!success && error) {
-			console.log(error);
 			NProgress.done();
+		}
+		if (errorOfSaved) {
+			setUrl(import.meta.env.VITE_FETCH_USERS_URL);
+			setCanFetchNew(true);
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loading]);
+
 	useEffect(() => {
-		setUrl(import.meta.env.VITE_FETCH_USERS_URL);
-	}, [loading && !savedUser]);
+		if (errorOfNew) {
+			setUrl(import.meta.env.VITE_FETCH_SAVED_USERS_URL);
+			setCanFetchSaved(true);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [errorOfNew]);
+	useEffect(() => {
+		setUrl(import.meta.env.VITE_FETCH_SAVED_USERS_URL);
+		setCanFetchSaved(true);
+		return () => {
+			setUrl(import.meta.env.VITE_FETCH_SAVED_USERS_URL);
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	useEffect(() => {
 		if (newUser) {
@@ -104,7 +120,14 @@ const UserProfileScreen: FC = () => {
 	};
 
 	const handleUpdate = () => {
-		// onUpdate(editableName);
+		if (user) {
+			setUrl(import.meta.env.VITE_FETCH_SAVED_USERS_URL);
+			const userToUpdate = {
+				...user,
+				name: { ...user.name, first: editableName },
+			};
+			updateUser({ email: user.email, user: userToUpdate });
+		}
 	};
 
 	const handleBack = () => {
@@ -121,15 +144,12 @@ const UserProfileScreen: FC = () => {
 				</div>
 				<div>
 					<label>Name: </label>
-					{user?.saved ? (
-						<input
-							type="text"
-							value={editableName}
-							onChange={handleNameChange}
-						/>
-					) : (
-						<span>{editableName}</span>
-					)}
+
+					<input
+						type="text"
+						value={editableName}
+						onChange={handleNameChange}
+					/>
 				</div>
 				<div>
 					<label>gender: </label>
@@ -141,17 +161,15 @@ const UserProfileScreen: FC = () => {
 				</div>
 				<div>
 					<label>saved:</label>
-					<span>{user?.saved}</span>
+					<span>{(!!user?._id).toString()}</span>
 				</div>
 			</form>
 			<div>
-				{user?.saved ? (
+				<button onClick={handleUpdate}>Update</button>
+				{!!user?._id && (
 					<>
-						<button onClick={handleUpdate}>Update</button>
 						<button onClick={handleDelete}>Delete</button>
 					</>
-				) : (
-					<button onClick={handleSave}>Save</button>
 				)}
 				<button onClick={handleBack}>Back</button>
 			</div>
